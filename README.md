@@ -1,1 +1,1 @@
-# em-multiomic
+# EM-star-multiomic
