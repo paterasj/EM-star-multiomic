@@ -1,5 +1,9 @@
- # Load all necessary packages 
+# Title: BRCA Subtype Differentially Expressed Gene Analysis 
+# Description: Conduct differentially expressed gene analysis based on EM* subtyping for BRCA Patients 
+# Author: Musaddiq Lodi 
+# Last Update: 9/7/2023 
 
+ # Load all necessary packages 
 library(CancerSubtypes)
 library(RTCGA.mRNA)
 library(limma)
@@ -17,20 +21,22 @@ library(patchwork)
 
 setwd("INSERT DESIRED DIRECTORY HERE")
 
-# Load in normal and diseased 
+# Load in normal and diseased as .rda file (or dataframe format of RNA-seq expression matrix, patients as columns and genes as rows)
 load('0802_new_geneexp_files/brca_normal.rda')
 load('0802_new_geneexp_files/brca_tumor.rda')
 
 
-
+# These groups are the subtypes for each patient informed by the EM* Analysis. Please load as a dataframe column, and follow conversion 
 new_group <- list(2,4,3,4,2,4,4,3,4,4,4,4,4,4,2,2,4,4,4,4,4,2,4,4,4,4,4,4,2,4,4,4,2,4,4,1,4,3,4,4,4,4,4,1,4,4,4,4,4,2,3,4,4,4,4,4,4,4,1,2,4,4,4,3,4,4,4,2,4,4,4,4,4,4,2,4,4,1,4,3,1,3,4,4,4,4,4,1,4,4,3,4,4,4,2,4,1,4,4,1,4,4,1,1,3,4,4,1,4,2,4,4,4,4,4,4,3,2,4,4,4,4,3,4,1,4,4,4,4,3,4,4,3,2,4,2,2,2,4,4,4,1,4,4,3,2,4,4,4,2,4,1,4,1,4,2,4,4,4,2,3,3,4,2,1,4,4,3,2,1,1,4,4,2,2,4,2,3,4,4,1,4,4,4,4,2,3,4,4,2,4,4,4,2,3,4,4,2,4,4,1,4,4,2,4,2,2,2,4,4,4,3,2,2,2,2,3,4,4,1,2,2,3,2,4,2,4,1,2,2,2,2,1,2,4,1,4,2,4,1,4,2,3,3,4,1,4,4,4,4,2,1,3,2,4,4,2,1,2,1,4,1,2,2,2,2,4,1,4,3,1,2,3,2,1,4,1,4,4,4,4,4,3,4,4,2,4,4,2,4,4,3,3,2,4,4,4,2,3,2,1,1)
 new_group_df <- as.data.frame(new_group)
 t_new_group_df <- as.data.frame(t(new_group_df))
 
-
+# Calculate DE Analysis using Limma 
 result2 <- DiffExp.limma(Tumor_Data=brca_tumor,Normal_Data=brca_normal,group=t_new_group_df$V1,topk=NULL,RNAseq=TRUE)
 
+# The top 50 genes are sorted in the result list index based on subtype. We are accessing the top 50 genes for each subtype and using them for further downstream analysis 
 
+# TODO 9/7/2023: GENERALIZE THIS TO MAKE IT FOR VARIABLE NUMBER OF SUBTYPES 
 result2[[1]]$ID <- gsub("\\..*","", result2[[1]]$ID)
 result2[[2]]$ID <- gsub("\\..*","", result2[[2]]$ID)
 result2[[3]]$ID <- gsub("\\..*","", result2[[3]]$ID)
@@ -42,6 +48,7 @@ Subtype3_gene <- as.vector(na.omit(result2[[3]]$ID[1:50]))
 Subtype4_gene <- as.vector(na.omit(result2[[4]]$ID[1:50]))
 
 
+
 create_volcano <- function(cancer_type, subtype_name, fc_table) {
 gene_list <- fc_table$ID
 annotations_orgDb <- AnnotationDbi::select(org.Hs.eg.db, # database
@@ -49,8 +56,8 @@ annotations_orgDb <- AnnotationDbi::select(org.Hs.eg.db, # database
                                            columns = c("ENSEMBL", "SYMBOL","GENENAME"), # information to retreive for given data
                                            keytype = "ENSEMBL") # type of data given in 'keys' argument
 
-#fc_table$SYMBOL <- annotations_orgDb$SYMBOL
-    # add a column of NAs
+# These parameters may be modified to color up/down regulated based on user preference. Consider adding this as a function argument with defaults 
+# add a column of NAs
 fc_table$diffexpressed <- "NO"
 # if log2Foldchange > 3.5 and pvalue < 0.05, set as "UP" 
 fc_table$diffexpressed[fc_table$logFC > 3.5 & fc_table$P.Value < 0.05] <- "UP"
@@ -82,7 +89,7 @@ return(volcano_1_fin)
 }
 
 
-
+# Will generate plots and write to appropriate directory 
 subtype_1_volc <- create_volcano("08022023_BRCA", "Subtype_1", result2[[1]])
 subtype_2_volc <- create_volcano("08022023_BRCA", "Subtype_2", result2[[2]])
 subtype_3_volc <- create_volcano("08022023_BRCA", "Subtype_3", result2[[3]])
@@ -122,10 +129,10 @@ ds_analysis_function <- function(cancer_type, gene_list, result_table, subtype_n
     sigOE_id <- as.character(na.omit(sigOE$ID))
     sigOE_name <- as.character(sigOE$SYMBOL)
     print("Finished getting sig genes step")
-    print("PRINTING SIGOE_NAME")
-    print(sigOE_name)
-    print("printing sigOE_genes")
-    print(sigOE_genes)
+    #print("PRINTING SIGOE_NAME")
+    #print(sigOE_name)
+    #print("printing sigOE_genes")
+    #print(sigOE_genes)
     # GO Overenrichment analysis 
     ego_1 <- clusterProfiler::enrichGO(gene = sigOE_genes,
                 keyType = "ENSEMBL",
@@ -135,8 +142,8 @@ ds_analysis_function <- function(cancer_type, gene_list, result_table, subtype_n
                 qvalueCutoff = 1,
                 pvalueCutoff = 1, 
                 readable = TRUE)
-    print("printing ego_1")
-    print(ego_1)
+    #print("printing ego_1")
+    #print(ego_1)
     print("Finished cluster enrichment step")
     # Create barplot 
     barplot_enrichment <- barplot(ego_1) + ggtitle(paste("Overrepresented Pathways in", subtype_name))
