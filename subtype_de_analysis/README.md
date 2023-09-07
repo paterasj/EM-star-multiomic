@@ -4,8 +4,10 @@
 
 ## Usage Instructions 
 
-For now, please download brca_subtype_de_analysis.R and run using the brca_normal.rda and brca_tumor.rda files in this repository. Further work remains on generalize this code and releasing as a Bioconductor package.
-Please change parameters according to preference (i.e how many subtypes are present from the EM* subtyping, threshold for up/down regulated, etc.). 
+For now, please download brca_subtype_de_analysis.R and run using the brca_normal.rda and brca_tumor.rda files in this repository.
+Please change parameters according to preference (i.e how many subtypes are present from the EM* subtyping, threshold for up/down regulated, etc.)
+
+Further work remains on generalize this code and releasing it as a Bioconductor package.
 
 ## Output
 
