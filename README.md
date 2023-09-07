@@ -8,8 +8,8 @@ For studying cancer biology, multiomic data integration has become an invaluable
 2) To run the subtyping differentially expressed gene & pathway enrichment, please navigate to the subtype_de_analysis directory and follow instructions.
 
 
-## Authors
+## Correspondence 
 
-Joseph Pateras, Musaddiq Lodi, Pratip Rana & Preetam Ghosh. 
+*Authors*: Joseph Pateras, Musaddiq Lodi, Pratip Rana & Preetam Ghosh. 
 
 In case of any questions regarding the usage of this code, please reach out to Joseph (paterasj@vcu.edu) or Musaddiq (lodimk2@vcu.edu)
